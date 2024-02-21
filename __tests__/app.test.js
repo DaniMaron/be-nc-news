@@ -176,7 +176,7 @@ describe("GET api/articles/:article_id/comments", () => {
   });
 });
 describe("POST api/articles/:article_id/comments", () => {
-  test("Status-201: responds with an object containing the newly posted comment", () => {
+  test("Status-201: responds with an object containing the newly posted comment and adds it to the comments table", () => {
     const newComment = {
       username: "icellusedkars",
       body: "Lovely article!",
@@ -194,10 +194,22 @@ describe("POST api/articles/:article_id/comments", () => {
           created_at: newComment.created_at.toISOString(),
           author: "icellusedkars",
           body: "Lovely article!",
-          article_id: 2,
+          article_id: 2
         });
-      });
-  });
+        
+        db.query(`SELECT * FROM comments WHERE comment_id = 19`)
+          .then(({ rows }) => {
+            expect(rows[0]).toMatchObject({
+              comment_id: 19,
+              votes: 0,
+              created_at: newComment.created_at,
+              author: "icellusedkars",
+              body: "Lovely article!",
+              article_id: 2,
+            }); 
+        })
+      })
+  })
   test("Status 400: responds with an appropriate status and error message when provided with a bad comment (no username)", () => {
     const newComment = { body: "Lovely article!", created_at: new Date() };
 
