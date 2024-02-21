@@ -59,7 +59,7 @@ describe("GET api/articles/:article_id", () => {
         expect(Object.keys(body[0]).includes("votes")).toBe(true);
         expect(Object.keys(body[0]).includes("article_img_url")).toBe(true);
 
-        expect(body[0].author).toBe('icellusedkars');
+        expect(body[0].author).toBe("icellusedkars");
         expect(body[0].title).toBe("Eight pug gifs that remind me of mitch");
         expect(body[0].article_id).toBe(3);
         expect(body[0].body).toBe("some gifs");
@@ -69,8 +69,6 @@ describe("GET api/articles/:article_id", () => {
         expect(body[0].article_img_url).toBe(
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
         );
-
-
       });
   });
   test("Status 404: responds with an appropriate error when given an article Id that does not exist", () => {
@@ -78,7 +76,7 @@ describe("GET api/articles/:article_id", () => {
       .get("/api/articles/999999")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Article not found");
+        expect(msg).toBe("Not found");
       });
   });
   test("Status 400: responds with an appropriate error when given an article Id that is invalid", () => {
@@ -98,7 +96,7 @@ describe("GET api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         expect(Array.isArray(body)).toBe(true);
-        expect(body.length).toBe(13)
+        expect(body.length).toBe(13);
         expect(Object.keys(body[0]).includes("author")).toBe(true);
         expect(Object.keys(body[0]).includes("title")).toBe(true);
         expect(Object.keys(body[0]).includes("article_id")).toBe(true);
@@ -106,7 +104,7 @@ describe("GET api/articles", () => {
         expect(Object.keys(body[0]).includes("created_at")).toBe(true);
         expect(Object.keys(body[0]).includes("votes")).toBe(true);
         expect(Object.keys(body[0]).includes("article_img_url")).toBe(true);
-        
+
         expect(body[0].author).toBe("icellusedkars");
         expect(body[0].title).toBe("Eight pug gifs that remind me of mitch");
         expect(body[0].article_id).toBe(3);
@@ -115,21 +113,65 @@ describe("GET api/articles", () => {
         expect(body[0].votes).toBe(0);
         expect(body[0].article_img_url).toBe(
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-          )
-          
-          expect(body).toBeSortedBy("created_at", { descending: true });
-        });
+        );
+
+        expect(body).toBeSortedBy("created_at", { descending: true });
+      });
   });
-  
-      test('Status 200: responds with an array of articles each containing a comments_count key with the total value of comments for said article', () => {
-        return request(app)
-          .get("/api/articles")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body[0].comment_count).toBe('2')
-            expect(body[1].comment_count).toBe('1')
-            expect(body[12].comment_count).toBe('0')
-            expect(body[6].comment_count).toBe('11')
-          })
-        })
+
+  test("Status 200: responds with an array of articles each containing a comments_count key with the total value of comments for said article", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body[0].comment_count).toBe("2");
+        expect(body[1].comment_count).toBe("1");
+        expect(body[12].comment_count).toBe("0");
+        expect(body[6].comment_count).toBe("11");
+      });
+  });
+});
+describe("GET api/articles/:article_id/comments", () => {
+  test("Status-200: responds with an array containing all comments for a given article ordered by most recent comment first", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body)).toBe(true);
+        expect(body[1]).toMatchObject({
+          comment_id: 2,
+          votes: 14,
+          created_at: "2020-10-31T03:03:00.000Z",
+          author: "butter_bridge",
+          body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          article_id: 1,
+        });
+
+        expect(body).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("Status 404: responds with an appropriate error when given an article Id that does not exist", () => {
+    return request(app)
+      .get("/api/articles/999999/comments")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Not found");
+      });
+  });
+  test("Status 400: responds with an appropriate error when given an article Id that is invalid", () => {
+    return request(app)
+      .get("/api/articles/forklift/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid input");
+      });
+  });
+  test("Status 200: responds with an empty array when an article exists but there are no comments associated with it", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toEqual("No comments found");
+      });
+  });
 });
