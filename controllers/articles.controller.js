@@ -5,15 +5,19 @@ function getArticleById(req, res, next) {
     .then((article) => {
       res.status(200).send(article);
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 }
 
 function getArticles(req, res, next) {
   fetchArticles()
     .then((articles) => {
-    res.status(200).send(articles)
+      res.status(200).send(articles);
     })
-  .catch(next)
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
-module.exports = {getArticleById, getArticles};
+module.exports = { getArticleById, getArticles };

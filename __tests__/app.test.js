@@ -175,3 +175,81 @@ describe("GET api/articles/:article_id/comments", () => {
       });
   });
 });
+describe("POST api/articles/:article_id/comments", () => {
+  test("Status-201: responds with an object containing the newly posted comment", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "Lovely article!",
+      created_at: new Date(),
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(typeof body[0]).toBe("object");
+        expect(body[0]).toMatchObject({
+          comment_id: 19,
+          votes: 0,
+          created_at: newComment.created_at.toISOString(),
+          author: "icellusedkars",
+          body: "Lovely article!",
+          article_id: 2,
+        });
+      });
+  });
+  test("Status 400: responds with an appropriate status and error message when provided with a bad comment (no username)", () => {
+    const newComment = { body: "Lovely article!", created_at: new Date() };
+
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+
+  test("Status 400: responds with an appropriate status and error message when provided with a bad comment (user not registered in database)", () => {
+    const newComment = {
+      username: "johnny",
+      body: "Lovely article!",
+      created_at: new Date(),
+    };
+
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+
+  test("Status 400: responds with an appropriate error when given an article Id that does not exist", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "Lovely article!",
+      created_at: new Date(),
+    };
+    return request(app)
+      .post("/api/articles/999999/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("Status 400: responds with an appropriate error when given an article Id that is invalid", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "Lovely article!",
+      created_at: new Date(),
+    };
+    return request(app)
+      .post("/api/articles/forklift/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid input");
+      });
+  });
+});
