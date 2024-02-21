@@ -20,6 +20,11 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticle);
 app.post("/api/articles/:article_id/comments", postCommentByArticle);
 
+
+app.all('/*',(req, res) => {
+  res.status(404).send({msg: 'Not Found'})
+})
+
 app.use((err, req, res, next) => {
   switch (err.code) {
     case "22P02":
