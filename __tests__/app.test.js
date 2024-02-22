@@ -30,14 +30,14 @@ describe("GET /api/topics", () => {
       .expect(404)
       .then(({ text }) => {
         text = JSON.parse(text);
-        expect(text.msg).toBe("Not Found");
+        expect(text.msg).toBe("Not found");
       });
   });
 });
 
 describe("GET /api", () => {
   test("Status-200: responds with an object containing all endpoints", () => {
-    fs.readFile(endpointsPath, "utf8").then((data) => {
+    return fs.readFile(endpointsPath, "utf8").then((data) => {
       data = JSON.parse(data);
       return request(app)
         .get("/api")
@@ -269,9 +269,9 @@ describe("PATCH /api/articles/:article_id", () => {
       .patch("/api/articles/3")
       .send(update)
       .expect(200)
-      .then(({ body }) => {
-        expect(typeof body).toBe("object");
-        expect(body[0]).toMatchObject({
+      .then(({ body: { article } }) => {
+        expect(typeof article[0]).toBe("object");
+        expect(article[0]).toMatchObject({
           title: "Eight pug gifs that remind me of mitch",
           author: "icellusedkars",
           article_id: 3,
@@ -362,6 +362,14 @@ describe("GET /api/users", () => {
       .get("/api/users")
       .expect(200)
       .then(({ body: { users } }) => {
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          });
+        });
         expect(users[0]).toMatchObject({
           username: "butter_bridge",
           name: "jonny",
@@ -370,12 +378,59 @@ describe("GET /api/users", () => {
         });
       });
   });
-  test("", () => {});
-  test("", () => {});
-  test("", () => {});
-  test("", () => {});
-  test("", () => {});
-  test("", () => {});
+});
+
+describe("GET /api/articles?:filteringquery=:value", () => {
+  test("Status 200: responds with an array of articles filtered by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(12);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+  test("Status 200: responds with an array of articles filtered by author", () => {
+    return request(app)
+      .get("/api/articles?author=rogersop")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(3);
+        articles.forEach((article) => {
+          expect(article.author).toBe("rogersop");
+        });
+      });
+  });
+  test("Status 200: responds with an array of articles filtered by both topic and author", () => {
+    return request(app)
+      .get("/api/articles?author=rogersop&topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(2);
+        articles.forEach((article) => {
+          expect(article.author).toBe("rogersop");
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+  test("Status 400: responds with an appropriate error when query key is invalid", () => {
+    return request(app)
+      .get("/api/articles?topix=mitch")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("Status 404: responds with an appropriate error when query value does not produce any article", () => {
+    return request(app)
+      .get("/api/articles?topic=73")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Not found");
+      });
+  });
 });
 
 describe("", () => {

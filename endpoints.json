@@ -18,7 +18,7 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles",
+    "description": "serves an array of all articles when no filtering queries are passed in, or a selection of matching ones otherwise",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
