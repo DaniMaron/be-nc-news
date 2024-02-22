@@ -4,6 +4,7 @@ const getEndpoints = require("./controllers/endPoints.controller");
 const {
   getArticleById,
   getArticles,
+  patchArticleById,
 } = require("./controllers/articles.controller");
 const {
   getCommentsByArticle,
@@ -19,11 +20,11 @@ app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticle);
 app.post("/api/articles/:article_id/comments", postCommentByArticle);
+app.patch("/api/articles/:article_id", patchArticleById);
 
-
-app.all('/*',(req, res) => {
-  res.status(404).send({msg: 'Not Found'})
-})
+app.all("/*", (req, res) => {
+  res.status(404).send({ msg: "Not Found" });
+});
 
 app.use((err, req, res, next) => {
   switch (err.code) {
