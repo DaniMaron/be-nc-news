@@ -323,6 +323,37 @@ describe("PATCH api/articles/:article_id", () => {
   });
 });
 
+describe("DELETE api/comments/:comment_id", () => {
+  test("Status 204: succesfully deletes comment with given comment_id", () => {
+    return request(app)
+      .delete("/api/comments/3")
+      .expect(204)
+      .then(() => {
+        db.query(`SELECT * FROM comments WHERE comment_id = 3;`).then(
+          ({ rows }) => {
+            expect(rows).toEqual([]);
+          }
+        );
+      });
+  });
+  test("Status 404: comment does not exist", () => {
+    return request(app)
+      .delete("/api/comments/99999")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Not found");
+      });
+  });
+  test("Status 400: comment_id is not a valid integer", () => {
+    return request(app)
+      .delete("/api/comments/forklift")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid input");
+      });
+  });
+});
+
 describe("", () => {
   test("", () => {});
 });
