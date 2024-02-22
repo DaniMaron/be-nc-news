@@ -10,7 +10,7 @@ const endpointsPath = path.join(__dirname, "../endpoints.json");
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
-describe("GET api/topics", () => {
+describe("GET /api/topics", () => {
   test("Status-200: responds with an array containing all topics", () => {
     return request(app)
       .get("/api/topics")
@@ -35,30 +35,30 @@ describe("GET api/topics", () => {
   });
 });
 
-describe("GET api", () => {
+describe("GET /api", () => {
   test("Status-200: responds with an object containing all endpoints", () => {
     fs.readFile(endpointsPath, "utf8").then((data) => {
       data = JSON.parse(data);
       return request(app)
         .get("/api")
         .expect(200)
-        .then(({ body }) => {
-          expect(typeof body).toBe("object");
-          expect(body).toEqual(data);
+        .then(({ body: { endpoints } }) => {
+          expect(typeof endpoints).toBe("object");
+          expect(endpoints).toEqual(data);
         });
     });
   });
 });
 
-describe("GET api/articles/:article_id", () => {
+describe("GET /api/articles/:article_id", () => {
   test("Status-200: responds with an object containing the selected article", () => {
     return request(app)
       .get("/api/articles/3")
       .expect(200)
-      .then(({ body }) => {
-        expect(typeof body).toBe("object");
+      .then(({ body: { article } }) => {
+        expect(typeof article).toBe("object");
 
-        expect(body[0]).toMatchObject({
+        expect(article[0]).toMatchObject({
           title: "Eight pug gifs that remind me of mitch",
           author: "icellusedkars",
           article_id: 3,
@@ -89,16 +89,16 @@ describe("GET api/articles/:article_id", () => {
   });
 });
 
-describe("GET api/articles", () => {
+describe("GET /api/articles", () => {
   test("Status-200: responds with an array containing all articles ordered by date in descending order", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body }) => {
-        expect(Array.isArray(body)).toBe(true);
-        expect(body.length).toBe(13);
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
 
-        expect(body[0]).toMatchObject({
+        expect(articles[0]).toMatchObject({
           title: "Eight pug gifs that remind me of mitch",
           author: "icellusedkars",
           article_id: 3,
@@ -108,9 +108,9 @@ describe("GET api/articles", () => {
           article_img_url:
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
         });
-        expect(body.body).toBe(undefined);
+        expect(articles.body).toBe(undefined);
 
-        expect(body).toBeSortedBy("created_at", { descending: true });
+        expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
 
@@ -118,15 +118,16 @@ describe("GET api/articles", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body }) => {
-        expect(body[0].comment_count).toBe("2");
-        expect(body[1].comment_count).toBe("1");
-        expect(body[12].comment_count).toBe("0");
-        expect(body[6].comment_count).toBe("11");
+      .then(({ body: { articles } }) => {
+        expect(articles[0].comment_count).toBe("2");
+        expect(articles[1].comment_count).toBe("1");
+        expect(articles[12].comment_count).toBe("0");
+        expect(articles[6].comment_count).toBe("11");
       });
   });
 });
-describe("GET api/articles/:article_id/comments", () => {
+
+describe("GET /api/articles/:article_id/comments", () => {
   test("Status-200: responds with an array containing all comments for a given article ordered by most recent comment first", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -170,7 +171,8 @@ describe("GET api/articles/:article_id/comments", () => {
       });
   });
 });
-describe("POST api/articles/:article_id/comments", () => {
+
+describe("POST /api/articles/:article_id/comments", () => {
   test("Status-201: responds with an object containing the newly posted comment and adds it to the comments table", () => {
     const newComment = {
       username: "icellusedkars",
@@ -180,9 +182,9 @@ describe("POST api/articles/:article_id/comments", () => {
       .post("/api/articles/2/comments")
       .send(newComment)
       .expect(201)
-      .then(({ body }) => {
-        expect(typeof body[0]).toBe("object");
-        expect(body[0]).toMatchObject({
+      .then(({ body: { comment } }) => {
+        expect(typeof comment[0]).toBe("object");
+        expect(comment[0]).toMatchObject({
           comment_id: 19,
           votes: 0,
           created_at: expect.any(String),
@@ -260,7 +262,7 @@ describe("POST api/articles/:article_id/comments", () => {
   });
 });
 
-describe("PATCH api/articles/:article_id", () => {
+describe("PATCH /api/articles/:article_id", () => {
   test("Status 200: responds with the updated object", () => {
     const update = { inc_votes: 1 };
     return request(app)
@@ -323,7 +325,7 @@ describe("PATCH api/articles/:article_id", () => {
   });
 });
 
-describe("DELETE api/comments/:comment_id", () => {
+describe("DELETE /api/comments/:comment_id", () => {
   test("Status 204: succesfully deletes comment with given comment_id", () => {
     return request(app)
       .delete("/api/comments/3")
@@ -352,6 +354,28 @@ describe("DELETE api/comments/:comment_id", () => {
         expect(msg).toBe("Invalid input");
       });
   });
+});
+
+describe("GET /api/users", () => {
+  test("Status 200: responds with an array containing all users", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(users[0]).toMatchObject({
+          username: "butter_bridge",
+          name: "jonny",
+          avatar_url:
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+        });
+      });
+  });
+  test("", () => {});
+  test("", () => {});
+  test("", () => {});
+  test("", () => {});
+  test("", () => {});
+  test("", () => {});
 });
 
 describe("", () => {
