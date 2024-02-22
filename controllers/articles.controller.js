@@ -7,7 +7,7 @@ const {
 function getArticleById(req, res, next) {
   fetchArticleById(req.params.article_id)
     .then((article) => {
-      res.status(200).send(article);
+      res.status(200).send({article: article});
     })
     .catch((err) => {
       next(err);
@@ -17,7 +17,7 @@ function getArticleById(req, res, next) {
 function getArticles(req, res, next) {
   fetchArticles()
     .then((articles) => {
-      res.status(200).send(articles);
+      res.status(200).send({articles: articles});
     })
     .catch((err) => {
       next(err);

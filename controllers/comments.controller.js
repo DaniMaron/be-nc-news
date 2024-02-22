@@ -23,7 +23,7 @@ function getCommentsByArticle(req, res, next) {
 function postCommentByArticle(req, res, next) {
   addCommentByArticle(req.params.article_id, req.body)
     .then((comment) => {
-      res.status(201).send(comment);
+      res.status(201).send({ comment: comment });
     })
     .catch((err) => {
       next(err);
