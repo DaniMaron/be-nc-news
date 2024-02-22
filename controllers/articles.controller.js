@@ -7,7 +7,7 @@ const {
 function getArticleById(req, res, next) {
   fetchArticleById(req.params.article_id)
     .then((article) => {
-      res.status(200).send({article: article});
+      res.status(200).send({ article: article });
     })
     .catch((err) => {
       next(err);
@@ -15,9 +15,12 @@ function getArticleById(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  fetchArticles()
+  const acceptableFilteringQueries = ["topic", "author"];
+  fetchArticles(req.query)
     .then((articles) => {
-      res.status(200).send({articles: articles});
+      if (articles.length === 0)
+        return Promise.reject({ status: 404, msg: `Not found` });
+      res.status(200).send({ articles: articles });
     })
     .catch((err) => {
       next(err);
@@ -30,7 +33,7 @@ function patchArticleById(req, res, next) {
       if (article.length === 0)
         return Promise.reject({ status: 404, msg: `Not found` });
 
-      res.status(200).send(article);
+      res.status(200).send({ article: article });
     })
     .catch((err) => {
       next(err);
