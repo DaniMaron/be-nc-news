@@ -2,6 +2,7 @@ const { fetchArticleById } = require("../models/articles.model");
 const {
   fetchCommentsByArticle,
   addCommentByArticle,
+  eraseCommentById,
 } = require("../models/comments.model");
 
 function getCommentsByArticle(req, res, next) {
@@ -29,4 +30,19 @@ function postCommentByArticle(req, res, next) {
     });
 }
 
-module.exports = { getCommentsByArticle, postCommentByArticle };
+function deleteCommentById(req, res, next) {
+  eraseCommentById(req.params.comment_id)
+    .then((rowCount) => {
+      if (rowCount === 1) res.status(204).send();
+      else res.status(404).send({ msg: "Not found" });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
+module.exports = {
+  deleteCommentById,
+  getCommentsByArticle,
+  postCommentByArticle,
+};
