@@ -56,7 +56,8 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/3")
       .expect(200)
       .then(({ body: { article } }) => {
-        expect(typeof article).toBe("object");
+
+        expect(typeof article[0]).toBe("object");
 
         expect(article[0]).toMatchObject({
           title: "Eight pug gifs that remind me of mitch",
@@ -68,6 +69,28 @@ describe("GET /api/articles/:article_id", () => {
           votes: 0,
           article_img_url:
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  test("Status-200: responds with an object containing the selected article that has a property of comment_count", () => {
+    return request(app)
+      .get("/api/articles/3")
+      .expect(200)
+      .then(({ body: { article } }) => {
+
+        expect(typeof article[0]).toBe("object");
+
+        expect(article[0]).toMatchObject({
+          title: "Eight pug gifs that remind me of mitch",
+          author: "icellusedkars",
+          article_id: 3,
+          body: "some gifs",
+          topic: "mitch",
+          created_at: "2020-11-03T09:12:00.000Z",
+          votes: 0,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          comment_count: "2",
         });
       });
   });
@@ -114,7 +137,7 @@ describe("GET /api/articles", () => {
       });
   });
 
-  test("Status 200: responds with an array of articles each containing a comments_count key with the total value of comments for said article", () => {
+  test("Status 200: responds with an array of articles each containing a comment_count key with the total value of comments for said article", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
