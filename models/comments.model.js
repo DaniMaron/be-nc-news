@@ -14,13 +14,13 @@ function fetchCommentsByArticle(article_id) {
 function addCommentByArticle(article_id, body) {
   return db
     .query(
-      `INSERT INTO comments (body, author, created_at, article_id)
-     VALUES ($1, $2, $3, $4)
+      `INSERT INTO comments (body, author, article_id)
+     VALUES ($1, $2, $3)
      RETURNING *;`,
-      [body.body, body.username, body.created_at, article_id]
+      [body.body, body.username, article_id]
     )
-    .then((data) => {
-      return data.rows;
+    .then(({ rows }) => {
+      return rows;
     });
 }
 
