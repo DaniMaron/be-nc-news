@@ -425,16 +425,18 @@ describe("GET /api/articles?:filteringquery=:value", () => {
       });
   });
   test("Status 200: responds with an array of articles filtered by both topic and author", () => {
-    return request(app)
-      .get("/api/articles?author=rogersop&topic=mitch")
-      // .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles.length).toBe(2);
-        articles.forEach((article) => {
-          expect(article.author).toBe("rogersop");
-          expect(article.topic).toBe("mitch");
-        });
-      });
+    return (
+      request(app)
+        .get("/api/articles?author=rogersop&topic=mitch")
+        // .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(2);
+          articles.forEach((article) => {
+            expect(article.author).toBe("rogersop");
+            expect(article.topic).toBe("mitch");
+          });
+        })
+    );
   });
   test("Status 400: responds with an appropriate error when query key is invalid", () => {
     return request(app)
@@ -457,7 +459,7 @@ describe("GET /api/articles?:filteringquery=:value", () => {
 describe("GET /api/articles?:sortingquery=:value", () => {
   test("Status 200: responds with an array of articles sorted by article_id", () => {
     return request(app)
-    .get("/api/articles?sort_by=article_id")
+      .get("/api/articles?sort_by=article_id")
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(Array.isArray(articles)).toBe(true);
@@ -477,7 +479,7 @@ describe("GET /api/articles?:sortingquery=:value", () => {
   });
   test("Status 200: responds with an array of articles in ascending order", () => {
     return request(app)
-    .get("/api/articles?order=asc")
+      .get("/api/articles?order=asc")
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(Array.isArray(articles)).toBe(true);
@@ -487,7 +489,7 @@ describe("GET /api/articles?:sortingquery=:value", () => {
   });
   test("Status 200: responds with an array of articles sorted by article_id in descending order", () => {
     return request(app)
-    .get("/api/articles?order=desc&sort_by=article_id")
+      .get("/api/articles?order=desc&sort_by=article_id")
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(Array.isArray(articles)).toBe(true);
@@ -506,6 +508,31 @@ describe("GET /api/articles?:sortingquery=:value", () => {
   test("Status 400: responds with an appropriate error when query value does not produce any article", () => {
     return request(app)
       .get("/api/articles?sort_by=73")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Not found");
+      });
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  test("Status-200: responds with an object containing the selected user", () => {
+    return request(app)
+      .get("/api/users/rogersop")
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(typeof user[0]).toBe("object");
+        expect(user[0]).toMatchObject({
+          username: "rogersop",
+          name: "paul",
+          avatar_url:
+            "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+        });
+      });
+  });
+  test("Status 404: responds with an appropriate error when given a username that does not exist", () => {
+    return request(app)
+      .get("/api/users/forklift")
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("Not found");

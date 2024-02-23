@@ -22,8 +22,7 @@ function fetchArticleById(id) {
       return rows;
     });
 }
-function fetchArticles(queries) { 
-
+function fetchArticles(queries) {
   const acceptableFilteringQueries = ["topic", "author"];
   const acceptableSortingQueries = ["sort_by", "order"];
 
