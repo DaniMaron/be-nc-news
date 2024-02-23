@@ -27,7 +27,7 @@ app.delete("/api/comments/:comment_id", deleteCommentById);
 app.get("/api/users", getUsers);
 
 app.all("/*", (req, res) => {
-  res.status(404).send({ msg: "Not found" });
+  res.status(404).send({ msg: "Not found" }); 
 });
 
 app.use((err, req, res, next) => {
@@ -40,6 +40,9 @@ app.use((err, req, res, next) => {
       break;
     case "23503":
       res.status(400).send({ msg: "Bad request" });
+      break;
+    case "42601":
+      res.status(404).send({ msg: "Not found" });
       break;
     case "42703":
       res.status(400).send({ msg: "Bad request" });
@@ -56,7 +59,6 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
   res.status(500).send({ msg: "Internal server error" });
 });
 

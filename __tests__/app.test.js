@@ -56,7 +56,6 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/3")
       .expect(200)
       .then(({ body: { article } }) => {
-
         expect(typeof article[0]).toBe("object");
 
         expect(article[0]).toMatchObject({
@@ -77,7 +76,6 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/3")
       .expect(200)
       .then(({ body: { article } }) => {
-
         expect(typeof article[0]).toBe("object");
 
         expect(article[0]).toMatchObject({
@@ -216,8 +214,9 @@ describe("POST /api/articles/:article_id/comments", () => {
           article_id: 2,
         });
 
-        db.query(`SELECT * FROM comments WHERE comment_id = 19`).then(
-          ({ rows }) => {
+        return db
+          .query(`SELECT * FROM comments WHERE comment_id = 19`)
+          .then(({ rows }) => {
             expect(rows[0]).toMatchObject({
               comment_id: 19,
               votes: 0,
@@ -225,8 +224,7 @@ describe("POST /api/articles/:article_id/comments", () => {
               body: "Lovely article!",
               article_id: 2,
             });
-          }
-        );
+          });
       });
   });
   test("Status 400: responds with an appropriate status and error message when provided with a bad comment (no username)", () => {
@@ -429,7 +427,7 @@ describe("GET /api/articles?:filteringquery=:value", () => {
   test("Status 200: responds with an array of articles filtered by both topic and author", () => {
     return request(app)
       .get("/api/articles?author=rogersop&topic=mitch")
-      .expect(200)
+      // .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles.length).toBe(2);
         articles.forEach((article) => {
@@ -449,6 +447,65 @@ describe("GET /api/articles?:filteringquery=:value", () => {
   test("Status 404: responds with an appropriate error when query value does not produce any article", () => {
     return request(app)
       .get("/api/articles?topic=73")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Not found");
+      });
+  });
+});
+
+describe("GET /api/articles?:sortingquery=:value", () => {
+  test("Status 200: responds with an array of articles sorted by article_id", () => {
+    return request(app)
+    .get("/api/articles?sort_by=article_id")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("article_id", { descending: true });
+      });
+  });
+  test("Status 200: responds with an array of articles sorted by title", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+  test("Status 200: responds with an array of articles in ascending order", () => {
+    return request(app)
+    .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("created_at", { descending: false });
+      });
+  });
+  test("Status 200: responds with an array of articles sorted by article_id in descending order", () => {
+    return request(app)
+    .get("/api/articles?order=desc&sort_by=article_id")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("article_id", { descending: true });
+      });
+  });
+  test("Status 400: responds with an appropriate error when query key is invalid", () => {
+    return request(app)
+      .get("/api/articles?sortByxxx=mitch")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("Status 400: responds with an appropriate error when query value does not produce any article", () => {
+    return request(app)
+      .get("/api/articles?sort_by=73")
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("Not found");

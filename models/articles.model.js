@@ -3,7 +3,7 @@ const db = require("../db/connection");
 function fetchArticleById(id) {
   return db
     .query(
-    `SELECT articles.article_id, articles.title, articles.body, 
+      `SELECT articles.article_id, articles.title, articles.body, 
     articles.author,articles.topic, articles.created_at,
     articles.votes, articles.article_img_url,
     COUNT(comments.body) AS comment_count
@@ -22,8 +22,8 @@ function fetchArticleById(id) {
       return rows;
     });
 }
+function fetchArticles(queries) { 
 
-function fetchArticles(queries) {
   const acceptableFilteringQueries = ["topic", "author"];
   const acceptableSortingQueries = ["sort_by", "order"];
 
@@ -33,37 +33,41 @@ function fetchArticles(queries) {
   COUNT(comments.body) AS comment_count
   FROM articles
   LEFT JOIN comments
-  ON articles.article_id = comments.article_id
+  ON articles.article_id = comments.article_id 
   `;
 
-  let dbQueryMiddle = "";
+  let dbQueryMiddle1 = "";
 
-  const dbQueryEnd = `
-    GROUP BY articles.article_id
-  ORDER BY articles.created_at DESC;`;
+  const dbQueryMiddle2 = ` GROUP BY articles.article_id`;
+  let dbQueryEnd1 = ` ORDER BY articles.created_at`;
+  let dbQueryEnd2 = ` DESC`;
 
   let values = [];
-
   const queriesKeys = Object.keys(queries);
   if (queriesKeys.length > 0) {
     for (let i = 0; i < queriesKeys.length; i++) {
       if (acceptableFilteringQueries.includes(queriesKeys[i])) {
-        if (i === 0) dbQueryMiddle += ` WHERE articles.${queriesKeys[i]} = $1`;
-        else
-          dbQueryMiddle += `
-         AND articles.${queriesKeys[i]} = $2`;
+        if (i === 0) dbQueryMiddle1 += ` WHERE articles.${queriesKeys[i]} = $1`;
+        else dbQueryMiddle1 += ` AND articles.${queriesKeys[i]} = $${i + 1}`;
         values.push(queries[queriesKeys[i]]);
+      } else if (acceptableSortingQueries.includes(queriesKeys[i])) {
+        if (queriesKeys[i] === "sort_by") {
+          dbQueryEnd1 = ` ORDER BY articles.${queries[queriesKeys[i]]}`;
+        } else {
+          dbQueryEnd2 = ` ${queries[queriesKeys[i]]}`;
+        }
       } else {
-        dbQueryMiddle += ` WHERE articles.kdsljs = 'mitch'`;
+        dbQueryMiddle1 += ` WHERE articles.invalid_column_name = 'mitch'`;
       }
     }
   }
 
-  return db
-    .query(dbQueryStart + dbQueryMiddle + dbQueryEnd, values)
-    .then(({ rows }) => {
-      return rows;
-    });
+  const queryString =
+    dbQueryStart + dbQueryMiddle1 + dbQueryMiddle2 + dbQueryEnd1 + dbQueryEnd2;
+
+  return db.query(queryString, values).then(({ rows }) => {
+    return rows;
+  });
 }
 
 function updateArticleById(article_id, inc_votes) {
