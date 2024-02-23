@@ -46,6 +46,10 @@ This API mimics the functionality of real-world platforms like Reddit, allowing 
 - **GET /api/articles (queries)**
   - Filter and sort articles based on specific criteria.
 
+- **GET /api/users/:username**
+  - Fetch a single user by its username.
+
+
 ## Try it Out
 
 To explore the Northcoders News API:
