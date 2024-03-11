@@ -29,7 +29,7 @@ app.patch("/api/articles/:article_id", patchArticleById);
 app.delete("/api/comments/:comment_id", deleteCommentById);
 app.get("/api/users", getUsers);
 app.get("/api/users/:username", getUserById);
-app.delete('/api/articles/:article_id', deleteArticleById)
+// app.delete('/api/articles/:article_id', deleteArticleById)
 
 app.all("/*", (req, res) => {
   res.status(404).send({ msg: "Not found" });
