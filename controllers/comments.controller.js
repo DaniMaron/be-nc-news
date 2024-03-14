@@ -33,7 +33,6 @@ function postCommentByArticle(req, res, next) {
 function deleteCommentById(req, res, next) {
   eraseCommentById(req.params.comment_id)
     .then((rowCount) => {
-
       if (rowCount !== 1)
       return Promise.reject({ status: 404, msg: `Not found` })
   

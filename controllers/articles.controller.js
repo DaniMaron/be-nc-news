@@ -2,6 +2,7 @@ const {
   fetchArticleById,
   fetchArticles,
   updateArticleById,
+  eraseArticleById,
 } = require("../models/articles.model");
 
 function getArticleById(req, res, next) {
@@ -40,4 +41,21 @@ function patchArticleById(req, res, next) {
     });
 }
 
-module.exports = { getArticleById, getArticles, patchArticleById };
+function deleteArticleById(req, res, next) {
+  eraseArticleById(req.params.article_id)
+    .then((rowCount) => {
+      if (rowCount !== 1)
+        return Promise.reject({ status: 404, msg: `Not found` });
+      res.status(204).send();
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
+module.exports = {
+  getArticleById,
+  getArticles,
+  patchArticleById,
+  deleteArticleById,
+};

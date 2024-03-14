@@ -51,7 +51,10 @@ function fetchArticles(queries) {
         values.push(queries[queriesKeys[i]]);
       } else if (acceptableSortingQueries.includes(queriesKeys[i])) {
         if (queriesKeys[i] === "sort_by") {
-          dbQueryEnd1 = ` ORDER BY articles.${queries[queriesKeys[i]]}`;
+          if (queries[queriesKeys[i]] === 'comment_count')
+            dbQueryEnd1 = ` ORDER BY ${queries[queriesKeys[i]]}`;
+          else
+            dbQueryEnd1 = ` ORDER BY articles.${queries[queriesKeys[i]]}`;
         } else {
           dbQueryEnd2 = ` ${queries[queriesKeys[i]]}`;
         }
@@ -60,16 +63,17 @@ function fetchArticles(queries) {
       }
     }
   }
-
+  
   const queryString =
-    dbQueryStart + dbQueryMiddle1 + dbQueryMiddle2 + dbQueryEnd1 + dbQueryEnd2;
+  dbQueryStart + dbQueryMiddle1 + dbQueryMiddle2 + dbQueryEnd1 + dbQueryEnd2;
+  console.log(queryString);
 
   return db.query(queryString, values).then(({ rows }) => {
     return rows;
   });
 }
 
-function updateArticleById(article_id, inc_votes) {
+function updateArticleById(article_id, inc_votes) { 
   return db
     .query(
       `UPDATE articles
@@ -83,4 +87,18 @@ function updateArticleById(article_id, inc_votes) {
     });
 }
 
-module.exports = { fetchArticleById, fetchArticles, updateArticleById };
+function eraseArticleById(article_id) {
+  return db
+    .query(`DELETE FROM articles WHERE article_id = $1`, [article_id])
+    .then(({ rowCount }) => {
+      console.log(rowCount, 'rowcount from model');
+      return rowCount;
+    });
+}
+
+module.exports = {
+  fetchArticleById,
+  fetchArticles,
+  updateArticleById,
+  eraseArticleById,
+};

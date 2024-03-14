@@ -458,14 +458,14 @@ describe("GET /api/articles?:filteringquery=:value", () => {
 
 describe("GET /api/articles?:sortingquery=:value", () => {
   test("Status 200: responds with an array of articles sorted by article_id", () => {
-    return request(app)
-      .get("/api/articles?sort_by=article_id")
-      .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(Array.isArray(articles)).toBe(true);
-        expect(articles.length).toBe(13);
-        expect(articles).toBeSortedBy("article_id", { descending: true });
-      });
+  return request(app)
+    .get("/api/articles?sort_by=article_id")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(Array.isArray(articles)).toBe(true);
+      expect(articles.length).toBe(13);
+      expect(articles).toBeSortedBy("article_id", { descending: true });
+    });
   });
   test("Status 200: responds with an array of articles sorted by title", () => {
     return request(app)
@@ -540,6 +540,37 @@ describe("GET /api/users/:username", () => {
   });
 });
 
+// describe("DELETE /api/articles/:article_id", () => {
+//   test("Status 204: succesfully deletes article with given article_id", () => {
+//   return request(app)
+//   .delete("/api/articles/2")
+//   .expect(204)
+//   .then(() => {
+//     db.query(`SELECT * FROM articles WHERE article_id = 3;`).then(
+//       (data) => {
+//         console.log(data);
+//         expect(data).toEqual([]);
+//       }
+//     );
+//       });
+//   });
+//   test("Status 404: article does not exist", () => {
+//     return request(app)
+//       .delete("/api/articles/99999")
+//       .expect(404)
+//       .then(({ body: { msg } }) => {
+//         expect(msg).toBe("Not found");
+//       });
+//   });
+//   test("Status 400: article_id is not a valid integer", () => {
+//     return request(app)
+//       .delete("/api/articles/forklift")
+//       .expect(400)
+//       .then(({ body: { msg } }) => {
+//         expect(msg).toBe("Invalid input");
+//       });
+//   });
+// });
 describe("", () => {
   test("", () => {});
 });
