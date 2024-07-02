@@ -97,6 +97,6 @@ PostgreSQL v8.7.3 or higher
 
 ## Additional Information
 
-Link to hosted version: [https://be-nc-news-p9rm.onrender.com/api]
+Link to hosted version: https://be-nc-news-p9rm.onrender.com/api
 
 Feel free to explore the API, test different endpoints, and integrate it into your projects. If you have any questions or encounter issues, please reach out to me. Happy coding!

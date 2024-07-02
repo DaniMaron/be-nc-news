@@ -438,6 +438,20 @@ describe("GET /api/articles?:filteringquery=:value", () => {
         })
     );
   });
+  test("Status 200: responds with an array of articles filtered by both author and topic", () => {
+    return (
+      request(app)
+        .get("/api/articles?topic=mitch&author=rogersop")
+        // .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(2);
+          articles.forEach((article) => {
+            expect(article.author).toBe("rogersop");
+            expect(article.topic).toBe("mitch");
+          });
+        })
+    );
+  });
   test("Status 400: responds with an appropriate error when query key is invalid", () => {
     return request(app)
       .get("/api/articles?topix=mitch")
@@ -487,14 +501,48 @@ describe("GET /api/articles?:sortingquery=:value", () => {
         expect(articles).toBeSortedBy("created_at", { descending: false });
       });
   });
-  test("Status 200: responds with an array of articles sorted by article_id in descending order", () => {
+  test("Status 200: responds with an array of articles sorted by article_id in ascending order", () => {
     return request(app)
-      .get("/api/articles?order=desc&sort_by=article_id")
+      .get("/api/articles?sort_by=article_id&order=asc")
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(Array.isArray(articles)).toBe(true);
         expect(articles.length).toBe(13);
-        expect(articles).toBeSortedBy("article_id", { descending: true });
+        expect(articles).toBeSortedBy("article_id", { descending: false });
+      });
+  });
+  test("Status 200: responds with an array of articles sorted in ascending order by article_id ", () => {
+    return request(app)
+      .get("/api/articles?order=asc&sort_by=article_id")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("article_id", { descending: false });
+      });
+  });
+  test("Status 200: responds with an array of articles sorted in ascending order by article_id and filtered by both topic and author ", () => {
+    return request(app)
+      .get(
+        "/api/articles?topic=mitch&order=asc&sort_by=article_id&author=rogersop"
+      )
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(2);
+        expect(articles).toBeSortedBy("article_id", { descending: false });
+      });
+  });
+  test("Status 200: responds with an array of articles filtered by both topic and author and sorted in ascending order by article_id ", () => {
+    return request(app)
+      .get(
+        "/api/articles?order=asc&author=rogersop&sort_by=article_id&topic=mitch"
+      )
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(2);
+        expect(articles).toBeSortedBy("article_id", { descending: false });
       });
   });
   test("Status 400: responds with an appropriate error when query key is invalid", () => {
