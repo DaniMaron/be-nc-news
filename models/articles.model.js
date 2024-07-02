@@ -42,23 +42,21 @@ function fetchArticles(queries) {
   let dbQueryEnd2 = ` DESC`;
 
   let values = [];
-  let c = 0
+  let c = 0;
   const queriesKeys = Object.keys(queries);
   if (queriesKeys.length > 0) {
     for (let i = 0; i < queriesKeys.length; i++) {
       if (acceptableFilteringQueries.includes(queriesKeys[i])) {
         if (c === 0) {
           dbQueryMiddle1 += ` WHERE articles.${queriesKeys[i]} = $1`;
-          c++
-        }
-        else dbQueryMiddle1 += ` AND articles.${queriesKeys[i]} = $${i + 1}`;
+          c++;
+        } else dbQueryMiddle1 += ` AND articles.${queriesKeys[i]} = $2`;
         values.push(queries[queriesKeys[i]]);
-      } else if (acceptableSortingQueries.includes(queriesKeys[i])) { 
+      } else if (acceptableSortingQueries.includes(queriesKeys[i])) {
         if (queriesKeys[i] === "sort_by") {
-          if (queries[queriesKeys[i]] === 'comment_count')
+          if (queries[queriesKeys[i]] === "comment_count")
             dbQueryEnd1 = ` ORDER BY ${queries[queriesKeys[i]]}`;
-          else
-            dbQueryEnd1 = ` ORDER BY articles.${queries[queriesKeys[i]]}`;
+          else dbQueryEnd1 = ` ORDER BY articles.${queries[queriesKeys[i]]}`;
         } else {
           dbQueryEnd2 = ` ${queries[queriesKeys[i]]}`;
         }
@@ -67,16 +65,16 @@ function fetchArticles(queries) {
       }
     }
   }
-  
+
   const queryString =
-  dbQueryStart + dbQueryMiddle1 + dbQueryMiddle2 + dbQueryEnd1 + dbQueryEnd2;
+    dbQueryStart + dbQueryMiddle1 + dbQueryMiddle2 + dbQueryEnd1 + dbQueryEnd2;
 
   return db.query(queryString, values).then(({ rows }) => {
     return rows;
   });
 }
 
-function updateArticleById(article_id, inc_votes) { 
+function updateArticleById(article_id, inc_votes) {
   return db
     .query(
       `UPDATE articles
