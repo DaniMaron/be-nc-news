@@ -1,35 +1,15 @@
 const cors = require('cors');
 const express = require("express");
-const getTopics = require("./controllers/topics.controller");
-const getEndpoints = require("./controllers/endPoints.controller");
-const {
-  getArticleById,
-  getArticles,
-  patchArticleById,
-  deleteArticleById,
-} = require("./controllers/articles.controller");
-const {
-  getCommentsByArticle,
-  postCommentByArticle,
-  deleteCommentById,
-} = require("./controllers/comments.controller");
-const { getUsers, getUserById } = require("./controllers/users.controller");
+const apiRouter = require('./routes/api-router');
+
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/topics", getTopics);
-app.get("/api", getEndpoints);
-app.get("/api/articles/:article_id", getArticleById);
-app.get("/api/articles", getArticles);
-app.get("/api/articles/:article_id/comments", getCommentsByArticle);
-app.post("/api/articles/:article_id/comments", postCommentByArticle);
-app.patch("/api/articles/:article_id", patchArticleById);
-app.delete("/api/comments/:comment_id", deleteCommentById);
-app.get("/api/users", getUsers);
-app.get("/api/users/:username", getUserById);
-// app.delete('/api/articles/:article_id', deleteArticleById)
+
+app.use("/api", apiRouter);
 
 app.all("/*", (req, res) => {
   res.status(404).send({ msg: "Not found" });
