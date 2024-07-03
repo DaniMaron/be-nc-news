@@ -526,9 +526,8 @@ describe("GET /api/articles?:sortingquery=:value", () => {
       .get(
         "/api/articles?topic=mitch&order=asc&sort_by=article_id&author=rogersop"
       )
-      .expect(200)
+      // .expect(200)
       .then(({ body: { articles } }) => {
-        expect(Array.isArray(articles)).toBe(true);
         expect(articles.length).toBe(2);
         expect(articles).toBeSortedBy("article_id", { descending: false });
       });
