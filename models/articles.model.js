@@ -55,7 +55,7 @@ function fetchArticles(queries) {
       } else if (acceptableSortingQueries.includes(queriesKeys[i])) {
         if (queriesKeys[i] === "sort_by") {
           if (queries[queriesKeys[i]] === "comment_count")
-            dbQueryEnd1 = ` ORDER BY ${queries[queriesKeys[i]]}`;
+            dbQueryEnd1 = ` ORDER BY comment_count`;
           else dbQueryEnd1 = ` ORDER BY articles.${queries[queriesKeys[i]]}`;
         } else {
           dbQueryEnd2 = ` ${queries[queriesKeys[i]]}`;
@@ -68,6 +68,8 @@ function fetchArticles(queries) {
 
   const queryString =
     dbQueryStart + dbQueryMiddle1 + dbQueryMiddle2 + dbQueryEnd1 + dbQueryEnd2;
+  
+  console.log(queryString);
 
   return db.query(queryString, values).then(({ rows }) => {
     return rows;
