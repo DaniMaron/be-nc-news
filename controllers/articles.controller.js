@@ -16,7 +16,6 @@ function getArticleById(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  const acceptableFilteringQueries = ["topic", "author"];
   fetchArticles(req.query)
     .then((articles) => {
       if (articles.length === 0)

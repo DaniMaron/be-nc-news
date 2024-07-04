@@ -5,6 +5,7 @@ const commentsRouter = require("express").Router({ mergeParams: true });
 
 commentsRouter.get("/", getCommentsByArticle);
 commentsRouter.post("/", postCommentByArticle);
+
 commentsRouter.delete("/:comment_id", deleteCommentById);
 
 

@@ -1,3 +1,4 @@
+const { path } = require("../app");
 const db = require("../db/connection");
 
 function fetchArticleById(id) {
@@ -23,6 +24,11 @@ function fetchArticleById(id) {
     });
 }
 function fetchArticles(queries) {
+  // const endpointsPath = path.join(__dirname, "../endpoints.json");
+  // console.log(endpointsPath);
+  // const endpoints = JSON.parse(fs.readFileSync(endpointsPath, "utf-8"));
+  // const acceptableFilteringQueries = endpoints.acceptableFilteringQueries;
+  
   const acceptableFilteringQueries = ["topic", "author"];
   const acceptableSortingQueries = ["sort_by", "order"];
 
@@ -66,7 +72,8 @@ function fetchArticles(queries) {
           dbQueryOrder = ` ${queries[key]}`;
         }
       } else {
-        dbQueryMiddle += ` WHERE articles.invalid_column_name = 'invalid_value'`;
+        return Promise.reject({ status: 400, msg: "Bad request" });
+      
       }
     }
   }
