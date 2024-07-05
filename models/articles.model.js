@@ -1,4 +1,5 @@
-const { path } = require("../app");
+const fs = require("fs/promises");
+const path = require("path");
 const db = require("../db/connection");
 
 function fetchArticleById(id) {
@@ -12,8 +13,7 @@ function fetchArticleById(id) {
     LEFT JOIN comments
     ON articles.article_id = comments.article_id
     WHERE articles.article_id = $1
-    GROUP BY articles.article_id
-    `,
+    GROUP BY articles.article_id`,
       [id]
     )
     .then(({ rows }) => {
@@ -23,71 +23,79 @@ function fetchArticleById(id) {
       return rows;
     });
 }
+
 function fetchArticles(queries) {
-  // const endpointsPath = path.join(__dirname, "../endpoints.json");
-  // console.log(endpointsPath);
-  // const endpoints = JSON.parse(fs.readFileSync(endpointsPath, "utf-8"));
-  // const acceptableFilteringQueries = endpoints.acceptableFilteringQueries;
-  
-  const acceptableFilteringQueries = ["topic", "author"];
-  const acceptableSortingQueries = ["sort_by", "order"];
+  const endpointsPath = path.join(__dirname, "../endpoints.json");
 
-  const dbQueryStart = `
-    SELECT articles.article_id, articles.title, 
-    articles.author, articles.topic, articles.created_at,
-    articles.votes, articles.article_img_url,
-    COUNT(comments.body) AS comment_count
-    FROM articles
-    LEFT JOIN comments ON articles.article_id = comments.article_id 
-  `;
+  return fs
+    .readFile(endpointsPath, "utf8")
+    .then((endpointsFile) => {
 
-  let dbQueryMiddle = ``;
-  const dbQueryGroupBy = ` GROUP BY articles.article_id`;
-  let dbQuerySortBy = ` ORDER BY articles.created_at`;
-  let dbQueryOrder = ` DESC`;
-
-  let values = [];
-  let paramIndex = 1;
-
-  const queriesKeys = Object.keys(queries);
-
-  if (queriesKeys.length > 0) {
-    for (const key of queriesKeys) {
-      if (acceptableFilteringQueries.includes(key)) {
-        if (!dbQueryMiddle.includes("WHERE")) {
-          dbQueryMiddle += ` WHERE articles.${key} = $${paramIndex}`;
-        } else {
-          dbQueryMiddle += ` AND articles.${key} = $${paramIndex}`;
-        }
-        values.push(queries[key]);
-        paramIndex++;
-      } else if (acceptableSortingQueries.includes(key)) {
-        if (key === "sort_by") {
-          const sortByField =
-            queries[key] === "comment_count"
-              ? "comment_count"
-              : `articles.${queries[key]}`;
-          dbQuerySortBy = ` ORDER BY ${sortByField}`;
-        } else {
-          dbQueryOrder = ` ${queries[key]}`;
-        }
-      } else {
-        return Promise.reject({ status: 400, msg: "Bad request" });
+      const acceptableFilteringQueries =
+        JSON.parse(endpointsFile)["GET /api/articles"].filteringQueries;
       
+      const acceptableSortingQueries =
+        JSON.parse(endpointsFile)["GET /api/articles"].sortingQueries;
+
+      const dbQueryStart = `
+        SELECT articles.article_id, articles.title, 
+        articles.author, articles.topic, articles.created_at,
+        articles.votes, articles.article_img_url,
+        COUNT(comments.body) AS comment_count
+        FROM articles
+        LEFT JOIN comments ON articles.article_id = comments.article_id 
+      `;
+
+      let dbQueryWhere = ``;
+      const dbQueryGroupBy = ` GROUP BY articles.article_id`;
+      
+      let dbQueryOrderBy = ` ORDER BY articles.created_at`;
+      let dbQueryDirection = ` DESC`;
+
+      let values = [];
+      let paramIndex = 1;
+
+      const queriesKeys = Object.keys(queries);
+
+      if (queriesKeys.length > 0) {
+        for (const key of queriesKeys) {
+          if (acceptableFilteringQueries.includes(key)) {
+            if (!dbQueryWhere.includes("WHERE")) {
+              dbQueryWhere += ` WHERE articles.${key} = $${paramIndex}`;
+            } else {
+              dbQueryWhere += ` AND articles.${key} = $${paramIndex}`;
+            }
+            values.push(queries[key]);
+            paramIndex++;
+          } else if (acceptableSortingQueries.includes(key)) {
+            if (key === "sort_by") {
+              const sortByField =
+                queries[key] === "comment_count"
+                  ? "comment_count"
+                  : `articles.${queries[key]}`;
+              dbQueryOrderBy = ` ORDER BY ${sortByField}`;
+            } else {
+              dbQueryDirection = ` ${queries[key]}`;
+            }
+          } else {
+            return Promise.reject({ status: 400, msg: "Bad request" });
+          }
+        }
       }
-    }
-  }
-  const queryString =
-    dbQueryStart +
-    dbQueryMiddle +
-    dbQueryGroupBy +
-    dbQuerySortBy +
-    dbQueryOrder;
+      const queryString =
+        dbQueryStart +
+        dbQueryWhere +
+        dbQueryGroupBy +
+        dbQueryOrderBy +
+        dbQueryDirection;
 
+      // console.log(queryString);
 
-  return db.query(queryString, values).then(({ rows }) => {
-    return rows;
-  });
+      return db.query(queryString, values);
+    })
+    .then(({ rows }) => {
+      return rows;
+    });
 }
 
 function updateArticleById(article_id, inc_votes) {
