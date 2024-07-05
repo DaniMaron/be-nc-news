@@ -1,26 +1,34 @@
 {
   "GET /api": {
     "description": "serves up a json representation of all the available endpoints of the api",
-    "queries": [],
-    "exampleResponse": {
-      "description": "serves an array of all topics",
-      "queries": [],
-      "exampleResponse": {
-        "topics": [{ "slug": "football", "description": "Footie!" }]
-      }
-    }
+    "queries": []
   },
   "GET /api/topics": {
     "description": "serves an array of all topics",
     "queries": [],
     "exampleResponse": {
-      "topics": [{ "slug": "football", "description": "Footie!" }]
+      "topics": [
+        { "description": "Code is love, code is life", "slug": "coding" },
+        { "description": "FOOTIE!", "slug": "football" },
+        {
+          "description": "Hey good looking, what you got cooking?",
+          "slug": "cooking"
+        }
+      ]
     }
   },
   "GET /api/articles": {
     "description": "serves an array of all articles when no filtering queries are passed in, or a selection of matching ones otherwise",
     "filteringQueries": ["author", "topic"],
-    "sortingQueries" : [ "sort_by", "order"],
+    "sortingQueries": [
+      "article_id",
+      "title",
+      "author",
+      "topic",
+      "created_at",
+      "votes",
+      "comment_count"
+    ],
     "exampleResponse": {
       "articles": [
         {
@@ -32,6 +40,26 @@
           "votes": 0,
           "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
           "comment_count": 6
+        },
+        {
+          "article_id": 13,
+          "title": "Another article about Mitch",
+          "author": "butter_bridge",
+          "topic": "mitch",
+          "created_at": "2020-10-11T11:24:00.000Z",
+          "votes": 0,
+          "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          "comment_count": 0
+        },
+        {
+          "article_id": 1,
+          "title": "Living in the shadow of a great man",
+          "author": "butter_bridge",
+          "topic": "mitch",
+          "created_at": "2020-07-09T20:11:00.000Z",
+          "votes": 100,
+          "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          "comment_count": 11
         }
       ]
     }

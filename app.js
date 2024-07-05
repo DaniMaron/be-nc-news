@@ -6,7 +6,7 @@ const {
   handlePsqlErrors,
   handleCustomErrors,
   handleServerErrors,
-} = require("./errors/index.js");
+} = require("./errors/errorHandlingMiddleware.js");
 
 const app = express();
 

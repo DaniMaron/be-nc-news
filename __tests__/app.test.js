@@ -552,12 +552,12 @@ describe("GET /api/articles?:sortingquery=:value", () => {
         expect(msg).toBe("Bad request");
       });
   });
-  test("Status 400: responds with an appropriate error when query value does not produce any article", () => {
+  test("Status 400: responds with an appropriate error when query value does is invalid", () => {
     return request(app)
       .get("/api/articles?sort_by=73")
-      .expect(404)
+      .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Not found");
+        expect(msg).toBe("Bad request");
       });
   });
 });

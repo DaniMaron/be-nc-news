@@ -30,12 +30,13 @@ function fetchArticles(queries) {
   return fs
     .readFile(endpointsPath, "utf8")
     .then((endpointsFile) => {
-
+      const endpoints = JSON.parse(endpointsFile);
       const acceptableFilteringQueries =
-        JSON.parse(endpointsFile)["GET /api/articles"].filteringQueries;
-      
+        endpoints["GET /api/articles"].filteringQueries;
       const acceptableSortingQueries =
-        JSON.parse(endpointsFile)["GET /api/articles"].sortingQueries;
+        endpoints["GET /api/articles"].sortingQueries;
+
+      const acceptableOrderValues = ["ASC", "DESC"];
 
       const dbQueryStart = `
         SELECT articles.article_id, articles.title, 
@@ -46,11 +47,10 @@ function fetchArticles(queries) {
         LEFT JOIN comments ON articles.article_id = comments.article_id 
       `;
 
-      let dbQueryWhere = ``;
-      const dbQueryGroupBy = ` GROUP BY articles.article_id`;
-      
-      let dbQueryOrderBy = ` ORDER BY articles.created_at`;
-      let dbQueryDirection = ` DESC`;
+      let dbQueryWhere = "";
+      const dbQueryGroupBy = " GROUP BY articles.article_id";
+      let dbQueryOrderBy = " ORDER BY articles.created_at";
+      let dbQueryDirection = " DESC";
 
       let values = [];
       let paramIndex = 1;
@@ -67,16 +67,20 @@ function fetchArticles(queries) {
             }
             values.push(queries[key]);
             paramIndex++;
-          } else if (acceptableSortingQueries.includes(key)) {
-            if (key === "sort_by") {
-              const sortByField =
-                queries[key] === "comment_count"
-                  ? "comment_count"
-                  : `articles.${queries[key]}`;
-              dbQueryOrderBy = ` ORDER BY ${sortByField}`;
-            } else {
-              dbQueryDirection = ` ${queries[key]}`;
-            }
+          } else if (
+            key === "sort_by" &&
+            acceptableSortingQueries.includes(queries[key])
+          ) {
+            dbQueryOrderBy = ` ORDER BY ${
+              queries[key] === "comment_count"
+                ? "comment_count"
+                : `articles.${queries[key]}`
+            }`;
+          } else if (
+            key === "order" &&
+            acceptableOrderValues.includes(queries[key].toUpperCase())
+          ) {
+            dbQueryDirection = ` ${queries[key].toUpperCase()}`;
           } else {
             return Promise.reject({ status: 400, msg: "Bad request" });
           }
@@ -88,8 +92,6 @@ function fetchArticles(queries) {
         dbQueryGroupBy +
         dbQueryOrderBy +
         dbQueryDirection;
-
-      // console.log(queryString);
 
       return db.query(queryString, values);
     })
