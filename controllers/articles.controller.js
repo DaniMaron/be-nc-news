@@ -18,7 +18,6 @@ function getArticleById(req, res, next) {
 function getArticles(req, res, next) {
   fetchArticles(req.query)
     .then((articles) => {
-      console.log(articles);
       if (articles.length === 0)
         return Promise.reject({ status: 404, msg: `Not found` });
       res.status(200).send({ articles: articles });

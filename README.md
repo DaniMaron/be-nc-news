@@ -92,8 +92,21 @@ To explore the Northcoders News API:
 
 ## Minimum Requirements
 
-Node.js v21.5.0 or higher  
+Node.js v20.10.0 or higher  
 PostgreSQL v8.7.3 or higher
+
+## Technologies Used
+
+- NodeJS - https://nodejs.org/en 
+- PostgreSQL - https://www.postgresql.org/ 
+- Express - https://expressjs.com/
+- npm - https://www.npmjs.com/
+- jest - https://jestjs.io/
+- pg - https://www.npmjs.com/package/pg
+- supertest - https://www.npmjs.com/package/supertest
+- dotenv - https://www.npmjs.com/package/dotenv
+- pg-format - https://www.npmjs.com/package/pg-format
+- husky - https://typicode.github.io/husky/
 
 ## Additional Information
 

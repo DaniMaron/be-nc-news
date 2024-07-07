@@ -26,17 +26,14 @@ function fetchArticleById(id) {
 
 function fetchArticles(queries) {
   const endpointsPath = path.join(__dirname, "../endpoints.json");
-
   return fs
     .readFile(endpointsPath, "utf8")
     .then((endpointsFile) => {
       const endpoints = JSON.parse(endpointsFile);
-      const acceptableFilteringQueries =
-        endpoints["GET /api/articles"].filteringQueries;
-      const acceptableSortingQueries =
-        endpoints["GET /api/articles"].sortingQueries;
 
-      const acceptableOrderValues = ["ASC", "DESC"];
+      const filteringQueries = endpoints["GET /api/articles"].filteringQueries;
+      const sortingQueries = endpoints["GET /api/articles"].sortingQueries;
+      const directionQueries = ["ASC", "DESC"];
 
       const dbQueryStart = `
         SELECT articles.article_id, articles.title, 
@@ -52,40 +49,36 @@ function fetchArticles(queries) {
       let dbQueryOrderBy = " ORDER BY articles.created_at";
       let dbQueryDirection = " DESC";
 
-      let values = [];
+      const values = [];
       let paramIndex = 1;
 
-      const queriesKeys = Object.keys(queries);
+      for (const [key, value] of Object.entries(queries)) {
+        if (filteringQueries.includes(key)) {
+          const condition = Array.isArray(value)
+            ? value
+                .map((_) => `articles.${key} = $${paramIndex++}`)
+                .join(" OR ")
+            : `articles.${key} = $${paramIndex++}`;
 
-      if (queriesKeys.length > 0) {
-        for (const key of queriesKeys) {
-          if (acceptableFilteringQueries.includes(key)) {
-            if (!dbQueryWhere.includes("WHERE")) {
-              dbQueryWhere += ` WHERE articles.${key} = $${paramIndex}`;
-            } else {
-              dbQueryWhere += ` AND articles.${key} = $${paramIndex}`;
-            }
-            values.push(queries[key]);
-            paramIndex++;
-          } else if (
-            key === "sort_by" &&
-            acceptableSortingQueries.includes(queries[key])
-          ) {
-            dbQueryOrderBy = ` ORDER BY ${
-              queries[key] === "comment_count"
-                ? "comment_count"
-                : `articles.${queries[key]}`
-            }`;
-          } else if (
-            key === "order" &&
-            acceptableOrderValues.includes(queries[key].toUpperCase())
-          ) {
-            dbQueryDirection = ` ${queries[key].toUpperCase()}`;
-          } else {
-            return Promise.reject({ status: 400, msg: "Bad request" });
-          }
+          dbQueryWhere += dbQueryWhere.includes("WHERE")
+            ? ` AND (${condition})`
+            : ` WHERE (${condition})`;
+
+          values.push(...(Array.isArray(value) ? value : [value]));
+        } else if (key === "sort_by" && sortingQueries.includes(value)) {
+          dbQueryOrderBy = ` ORDER BY ${
+            value === "comment_count" ? "comment_count" : `articles.${value}`
+          }`;
+        } else if (
+          key === "order" &&
+          directionQueries.includes(value.toUpperCase())
+        ) {
+          dbQueryDirection = ` ${value.toUpperCase()}`;
+        } else {
+          return Promise.reject({ status: 400, msg: "Bad request" });
         }
       }
+
       const queryString =
         dbQueryStart +
         dbQueryWhere +
@@ -93,11 +86,10 @@ function fetchArticles(queries) {
         dbQueryOrderBy +
         dbQueryDirection;
 
+      console.log(queryString);
       return db.query(queryString, values);
     })
-    .then(({ rows }) => {
-      return rows;
-    });
+    .then(({ rows }) => rows);
 }
 
 function updateArticleById(article_id, inc_votes) {

@@ -472,14 +472,14 @@ describe("GET /api/articles?:filteringquery=:value", () => {
 
 describe("GET /api/articles?:sortingquery=:value", () => {
   test("Status 200: responds with an array of articles sorted by article_id", () => {
-  return request(app)
-    .get("/api/articles?sort_by=article_id")
-    .expect(200)
-    .then(({ body: { articles } }) => {
-      expect(Array.isArray(articles)).toBe(true);
-      expect(articles.length).toBe(13);
-      expect(articles).toBeSortedBy("article_id", { descending: true });
-    });
+    return request(app)
+      .get("/api/articles?sort_by=article_id")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("article_id", { descending: true });
+      });
   });
   test("Status 200: responds with an array of articles sorted by title", () => {
     return request(app)
@@ -522,15 +522,17 @@ describe("GET /api/articles?:sortingquery=:value", () => {
       });
   });
   test("Status 200: responds with an array of articles sorted in ascending order by article_id and filtered by both topic and author ", () => {
-    return request(app)
-      .get(
-        "/api/articles?topic=mitch&order=asc&sort_by=article_id&author=rogersop"
-      )
-      // .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles.length).toBe(2);
-        expect(articles).toBeSortedBy("article_id", { descending: false });
-      });
+    return (
+      request(app)
+        .get(
+          "/api/articles?topic=mitch&order=asc&sort_by=article_id&author=rogersop"
+        )
+        // .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(2);
+          expect(articles).toBeSortedBy("article_id", { descending: false });
+        })
+    );
   });
   test("Status 200: responds with an array of articles filtered by both topic and author and sorted in ascending order by article_id ", () => {
     return request(app)
@@ -542,6 +544,59 @@ describe("GET /api/articles?:sortingquery=:value", () => {
         expect(Array.isArray(articles)).toBe(true);
         expect(articles.length).toBe(2);
         expect(articles).toBeSortedBy("article_id", { descending: false });
+      });
+  });
+  test("Status 200: responds with an array of articles filtered by two different topics ", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch&topic=cats")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        for (const article of articles)
+          expect(article.topic).toMatch(/mitch|cats/);
+      });
+  });
+
+  test("Status 200: responds with an array of articles filtered by two different authors ", () => {
+    return request(app)
+      .get("/api/articles?author=rogersop&author=butter_bridge")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(7);
+        for (const article of articles)
+          expect(article.author).toMatch(/rogersop|butter_bridge/);
+      });
+  });
+  test("Status 200: responds with an array of articles filtered by three different authors ", () => {
+    return request(app)
+      .get(
+        "/api/articles?author=butter_bridge&author=rogersop&author=icellusedkars"
+      )
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
+        for (const article of articles)
+          expect(article.author).toMatch(
+            /rogersop|butter_bridge|icellusedkars/
+          );
+      });
+  });
+  test("Status 200: responds with an array of articles filtered by two different authors and two different topics ", () => {
+    return request(app)
+      .get(
+        "/api/articles?author=rogersop&author=icellusedkars&topic=mitch&topic=cats"
+      )
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(9);
+        for (const article of articles) {
+          expect(article.author).toMatch(/rogersop|icellusedkars/);
+          expect(article.topic).toMatch(/mitch|cats/);
+        }
       });
   });
   test("Status 400: responds with an appropriate error when query key is invalid", () => {
